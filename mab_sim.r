@@ -1,7 +1,7 @@
 # multi-armed bandit simulator
 
 machNum=10
-triesNum=400
+triesNum=500
 
 p <- runif(machNum) # do not look at p until you are finished!
 
@@ -43,9 +43,22 @@ UCB<-function(mach)
   else
   {
     r1 <- (tries/triesNum) * getBayP(mach)
-    r2 <- ((triesNum-tries)/triesNum) * sqrt(2*log(tries)/totalNum[mach])
+    r2 <- ((triesNum-tries)/triesNum)/5 * sqrt(2*log(tries)/totalNum[mach])
     return(r1+r2)
   }
+}
+
+chooseTS <- function() 
+{
+  alpha<-winNum
+  beta<-totalNum
+  # Thompson Sampling
+  n <- length(alpha)
+  theta <- rbeta(n, alpha, beta)
+  maxSub<-which(theta==max(theta),arr.ind=TRUE)
+  cho<-maxSub[rand(1,length(maxSub))]
+  choice[tries+1]<<-cho
+  return(cho)
 }
 
 rand<-function(min,max) {floor(runif(1,min,max+1))}
@@ -92,7 +105,7 @@ chooseGreedy<-function()
 while(tries<triesNum)
 {
   cat("enter choice of machine and number of tries")
-  machine<-chooseUCB()
+  machine<-chooseTS()
   times<-1
   thisWin<-play(machine,times)
   winNum[machine]<-winNum[machine]+thisWin
